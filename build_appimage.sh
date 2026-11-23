@@ -40,7 +40,7 @@ cat << 'EOF' > AppDir/AppRun
 HERE="$(dirname "$(readlink -f "${0}")")"
 export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS:-/usr/share}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland;xcb}"
-exec "${HERE}/usr/bin/whatsapp-linux/whatsapp-linux" "$@"
+exec "${HERE}/usr/bin/whatsapp-linux" "$@"
 EOF
 chmod +x AppDir/AppRun
 
