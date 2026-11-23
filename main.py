@@ -70,7 +70,10 @@ CONFIG_DIR = os.path.expanduser("~/.config/whatsapp-linux")
 STORAGE_DIR = os.path.join(CONFIG_DIR, "qt_profile")
 CACHE_DIR = os.path.expanduser("~/.cache/whatsapp-linux")
 WINDOW_STATE_FILE = os.path.join(CONFIG_DIR, "window-state.json")
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, 'frozen', False):
+    SCRIPT_DIR = sys._MEIPASS
+else:
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ICON_PATH = os.path.join(SCRIPT_DIR, "resources", "icon.png")
 
 USER_AGENT = (
