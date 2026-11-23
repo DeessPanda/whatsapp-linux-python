@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+.venv/
+
+# Build artifacts
+dist/
+build/
+*.spec
+AppDir/
+
+# App runtime data
+window-state.json
+whatsapp-linux-instance.sock
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
