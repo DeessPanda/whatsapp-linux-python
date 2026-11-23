@@ -23,3 +23,4 @@ whatsapp-linux-instance.sock
 # OS
 .DS_Store
 Thumbs.db
+*.AppImage
