@@ -31,16 +31,18 @@ os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = (
     "--disable-frame-rate-limit "
     "--disable-site-isolation-trials "
     "--expose-gc "
-    "--disk-cache-size=33554432 "
-    "--media-cache-size=16777216 "
+    "--disk-cache-size=8388608 "
+    "--media-cache-size=4194304 "
     "--enable-aggressive-domstorage-flushing "
     "--ozone-platform-hint=auto "
     "--enable-features=VaapiVideoDecoder,VaapiIgnoreDriverChecks,CanvasOopRasterization "
     "--enable-gpu-rasterization "
     "--enable-zero-copy "
     "--ignore-gpu-blocklist "
-    "--js-flags=--max-old-space-size=384 "
-    "--renderer-process-limit=2 "
+    "--js-flags=--max-old-space-size=256 "
+    "--renderer-process-limit=1 "
+    "--disable-features=AudioServiceOutOfProcess,InterestFeedContentSuggestions,BackgroundFetch "
+    "--disable-background-timer-throttling "
 )
 
 from PySide6.QtCore import (
@@ -57,7 +59,7 @@ from PySide6.QtNetwork import (
 )
 from PySide6.QtWebEngineCore import (
     QWebEngineProfile, QWebEnginePage, QWebEngineSettings,
-    QWebEngineScript
+    QWebEngineScript, QWebEngineDownloadRequest
 )
 from PySide6.QtWebEngineWidgets import (
     QWebEngineView
@@ -223,22 +225,23 @@ class WhatsAppMainWindow(QMainWindow):
         self.view.load(QUrl("https://web.whatsapp.com"))
 
     def on_download_requested(self, download_item):
-        filename = download_item.downloadFileName()
+        filename = download_item.downloadFileName() or "whatsapp_file"
         downloads_dir = os.path.expanduser("~/Downloads")
         os.makedirs(downloads_dir, exist_ok=True)
-        save_path = os.path.join(downloads_dir, filename)
+        
+        target_path = os.path.join(downloads_dir, filename)
+        download_item.setDownloadDirectory(downloads_dir)
+        download_item.setDownloadFileName(filename)
+        download_item.accept()
 
-        if download_item.savePath():
-            download_item.accept()
-        else:
-            download_item.setDownloadDirectory(downloads_dir)
-            download_item.setDownloadFileName(filename)
-            download_item.accept()
+        print(f"[WhatsApp] Download started: {filename} -> {downloads_dir}")
 
-        download_item.downloadStateChanged.connect(
-            lambda s: s == download_item.DownloadState.SavedState and self._notify_download(filename)
-        )
-        print(f"[WhatsApp] Downloading: {filename} → {downloads_dir}")
+        def check_state(state):
+            if state == QWebEngineDownloadRequest.DownloadState.DownloadCompleted:
+                print(f"[WhatsApp] Download completed: {filename}")
+                self._notify_download(filename)
+
+        download_item.downloadStateChanged.connect(check_state)
 
     def _notify_download(self, filename):
         self.tray.showMessage(
