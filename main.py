@@ -229,19 +229,26 @@ class WhatsAppMainWindow(QMainWindow):
         downloads_dir = os.path.expanduser("~/Downloads")
         os.makedirs(downloads_dir, exist_ok=True)
         
-        target_path = os.path.join(downloads_dir, filename)
         download_item.setDownloadDirectory(downloads_dir)
         download_item.setDownloadFileName(filename)
         download_item.accept()
 
         print(f"[WhatsApp] Download started: {filename} -> {downloads_dir}")
 
-        def check_state(state):
+        def handle_state():
+            state = download_item.state()
             if state == QWebEngineDownloadRequest.DownloadState.DownloadCompleted:
                 print(f"[WhatsApp] Download completed: {filename}")
-                self._notify_download(filename)
+                self.tray.showMessage(
+                    "Download Complete",
+                    f"Saved {filename} to ~/Downloads/",
+                    self.app_icon,
+                    5000
+                )
+            elif state == QWebEngineDownloadRequest.DownloadState.DownloadFailed:
+                print(f"[WhatsApp] Download failed: {filename}")
 
-        download_item.downloadStateChanged.connect(check_state)
+        download_item.downloadStateChanged.connect(handle_state)
 
     def _notify_download(self, filename):
         self.tray.showMessage(
@@ -376,7 +383,15 @@ class WhatsAppMainWindow(QMainWindow):
         self.save_state()
         if self.devtools_window:
             self.devtools_window.close()
+        # Cleanly terminate any lingering QtWebEngine child processes
+        try:
+            pid = os.getpid()
+            import subprocess
+            subprocess.run(f"pkill -P {pid}", shell=True, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
         QApplication.quit()
+        os._exit(0)
 
 
 def setup_single_instance(window):
