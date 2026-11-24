@@ -1,11 +1,10 @@
 [Desktop Entry]
-Name=WhatsApp
-Comment=Native WhatsApp Web client for Linux (Qt6 / Chromium)
-Exec="/home/deesspanda/Personal Data/Projects/whatsapp-linux-tauri/Temp/whatsapp-linux/whatsapp-linux" %U
-Icon=/home/deesspanda/Personal Data/Projects/whatsapp-linux-tauri/Temp/whatsapp-linux/resources/icon.png
-Terminal=false
 Type=Application
+Name=WhatsApp Linux
+Comment=Lightweight WhatsApp Web Client
+Exec=whatsapp-linux
+Icon=whatsapp-linux
 Categories=Network;InstantMessaging;Chat;
+Terminal=false
+StartupNotify=true
 StartupWMClass=whatsapp-linux
-MimeType=x-scheme-handler/whatsapp;
-Keywords=WhatsApp;chat;im;messaging;

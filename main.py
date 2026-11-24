@@ -209,6 +209,9 @@ class WhatsAppMainWindow(QMainWindow):
         shortcut_inspect = QShortcut(QKeySequence("Ctrl+Shift+I"), self)
         shortcut_inspect.activated.connect(self.toggle_devtools)
 
+        # Download handling
+        self.profile.downloadRequested.connect(self.on_download_requested)
+
         # System tray setup
         self.setup_tray()
 
@@ -218,6 +221,32 @@ class WhatsAppMainWindow(QMainWindow):
         # Load WhatsApp Web
         print("[WhatsApp] Loading https://web.whatsapp.com ...")
         self.view.load(QUrl("https://web.whatsapp.com"))
+
+    def on_download_requested(self, download_item):
+        filename = download_item.downloadFileName()
+        downloads_dir = os.path.expanduser("~/Downloads")
+        os.makedirs(downloads_dir, exist_ok=True)
+        save_path = os.path.join(downloads_dir, filename)
+
+        if download_item.savePath():
+            download_item.accept()
+        else:
+            download_item.setDownloadDirectory(downloads_dir)
+            download_item.setDownloadFileName(filename)
+            download_item.accept()
+
+        download_item.downloadStateChanged.connect(
+            lambda s: s == download_item.DownloadState.SavedState and self._notify_download(filename)
+        )
+        print(f"[WhatsApp] Downloading: {filename} → {downloads_dir}")
+
+    def _notify_download(self, filename):
+        self.tray.showMessage(
+            "Download Complete",
+            f"{filename} saved to ~/Downloads/",
+            self.app_icon,
+            4000
+        )
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(self.app_icon, self)
